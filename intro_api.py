@@ -7,17 +7,19 @@ from multiprocessing import Process
 
 # http://0.0.0.0:6060/task/1234 - POST - to create a job
 # http://0.0.0.0:6060/jobstatus/1234 - GET - to get job status
-# 
+# http://0.0.0.0:6060/jobstatus/clear/1234 - PUT - to clear a job status
 
 RUNNING_STATUS = "RUNNING"
 WAITING_STATUS = "WAITING"
 FAILED_STATUS = "FAILED"
 COMPLETED_STATUS = "COMPLETED"
+JOB_CLEARED = "JOB CLEARED"
 
 MAX_NUM_CONCURRENT_RUNNING_JOBS = 8
 MAX_NUM_CONCURRENT_PROCESSING_JOBS = 4
 
 JOB_NOT_FOUND = "JOB NOT FOUND"
+JOB_NOT_COMPLETED = "JOB NOT COMPLETED"
 
 SLEEPING_SECONDS = 5
 LONG_SLEEPING_SECONDS = 30
@@ -28,8 +30,6 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 def update_job_status(jobs, job_id, status):
     jobs[job_id] = status
-    print(jobs)
-    
 
 def get_num_jobs(status):
     global jobs
@@ -47,11 +47,20 @@ def get_num_processing_jobs():
             returnnumber += 1
     return returnnumber
 
-@app.route("/jobstatus/<job_id>")
+@app.route("/jobstatus/<job_id>", methods=['GET'])
 def get_job_status(job_id):
-    print(jobs)
     if job_id in jobs:
         return jobs[job_id]
+    return JOB_NOT_FOUND
+
+@app.route("/jobstatus/clear/<job_id>", methods=['PUT'])
+def clear_job_status(job_id):
+    if job_id in jobs:
+        if jobs[job_id] == "COMPLETED" :
+            jobs.pop(job_id, None)
+            return JOB_CLEARED
+        else :
+            return JOB_NOT_COMPLETED
     return JOB_NOT_FOUND
 
 def run_task(job_id, jobs) :
