@@ -5,8 +5,9 @@ import time
 import multiprocessing
 from multiprocessing import Process
 
-# http://0.0.0.0:6060/jobstatus/1234 - GET - to get job status
 # http://0.0.0.0:6060/task/1234 - POST - to create a job
+# http://0.0.0.0:6060/jobstatus/1234 - GET - to get job status
+# 
 
 RUNNING_STATUS = "RUNNING"
 WAITING_STATUS = "WAITING"
@@ -54,7 +55,6 @@ def get_job_status(job_id):
     return JOB_NOT_FOUND
 
 def run_task(job_id, jobs) :
-    print("WWWWWWWWW")
     update_job_status(jobs, job_id, WAITING_STATUS)
 
     while get_num_jobs(RUNNING_STATUS) > MAX_NUM_CONCURRENT_RUNNING_JOBS:
